@@ -1,2 +1,5 @@
-# OneClickDeployQChatGPT
-QChatGPT+NapCat一键部署脚本教程
+# QChatGPT+NapCat一键部署脚本教程
+
+> 此脚本由本站作者制作，能力有限，功能不足和可能的使用错误还请谅解
+
+## 使用教程：
