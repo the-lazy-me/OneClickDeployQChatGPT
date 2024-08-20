@@ -7,7 +7,7 @@
 在Linux系统上，复制下面的命令，直接执行即可
 
 ```bash
-curl -sS -O https://github.com/the-lazy-me/OneClickDeployQChatGPT/releases/download/v1.0/one-click-deploy-qchatgpt.sh && chmod +x one-click-deploy-qchatgpt.sh && sudo ./one-click-deploy-qchatgpt.sh
+wget https://github.com/the-lazy-me/OneClickDeployQChatGPT/releases/download/v1.0/one-click-deploy-qchatgpt.sh && chmod +x one-click-deploy-qchatgpt.sh && sudo ./one-click-deploy-qchatgpt.sh
 ```
 
 ## Q&A
