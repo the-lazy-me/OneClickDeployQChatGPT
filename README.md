@@ -9,6 +9,10 @@
 ```bash
 sudo curl -fsSL -o one-click-deploy-qchatgpt.sh https://github.com/the-lazy-me/OneClickDeployQChatGPT/releases/download/v1.0/one-click-deploy-qchatgpt.sh && sudo chmod +x one-click-deploy-qchatgpt.sh && sudo ./one-click-deploy-qchatgpt.sh
 ```
+或者使用（上面可以因为Github无法访问而不能使用）
+```bash
+sudo curl -fsSL -o one-click-deploy-qchatgpt.sh https://pan.lazyshare.top/f/pYfA/one-click-deploy-qchatgpt.sh && sudo chmod +x one-click-deploy-qchatgpt.sh && sudo ./one-click-deploy-qchatgpt.sh
+```
 
 ## Q&A
 
