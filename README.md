@@ -7,11 +7,11 @@
 在Linux系统上，复制下面的命令，直接执行即可
 
 ```bash
-sudo curl -fsSL -o one-click-deploy-qchatgpt.sh https://github.com/the-lazy-me/OneClickDeployQChatGPT/releases/download/v1.0/one-click-deploy-qchatgpt.sh && sudo chmod +x one-click-deploy-qchatgpt.sh && sudo ./one-click-deploy-qchatgpt.sh
+sudo curl -fsSL -o deploy.sh https://github.com/the-lazy-me/OneClickDeployQChatGPT/releases/download/v1.0/deploy.sh && sudo chmod +x deploy.sh && sudo ./deploy.sh
 ```
 或者使用（上面可以因为Github无法访问而不能使用）
 ```bash
-sudo curl -fsSL -o one-click-deploy-qchatgpt.sh https://pan.lazyshare.top/f/pYfA/one-click-deploy-qchatgpt.sh && sudo chmod +x one-click-deploy-qchatgpt.sh && sudo ./one-click-deploy-qchatgpt.sh
+sudo curl -fsSL -o deploy.sh https://pan.lazyshare.top/f/pYfA/deploy.sh && sudo chmod +x deploy.sh && sudo ./deploy.sh
 ```
 
 ## Q&A
