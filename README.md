@@ -11,7 +11,7 @@ sudo curl -fsSL -o deploy.sh https://github.com/the-lazy-me/OneClickDeployQChatG
 ```
 或者使用（上面可以因为Github无法访问而不能使用）
 ```bash
-sudo curl -fsSL -o deploy.sh https://pan.lazyshare.top/f/pYfA/deploy.sh && sudo chmod +x deploy.sh && sudo ./deploy.sh
+sudo curl -fsSL -o deploy.sh https://pan.lazyshare.top/f/rRi2/deploy.sh && sudo chmod +x deploy.sh && sudo ./deploy.sh
 ```
 
 ## Q&A
