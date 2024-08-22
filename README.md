@@ -7,7 +7,7 @@
 在Linux系统上，复制下面的命令，直接执行即可
 
 ```bash
-sudo curl -fsSL -o deploy.sh https://pan.lazyshare.top/one-click-deploy-qchatgpt/deploy.sh && sudo chmod +x deploy.sh && sudo ./deploy.sh
+sudo curl -fsSL -o deploy.sh https://pan.lazyshare.top/one-click-deploy-qchatgpt/deploy.sh && sudo chmod +x deploy.sh && sudo bash deploy.sh
 ```
 
 ## Q&A
