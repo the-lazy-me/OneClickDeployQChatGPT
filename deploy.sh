@@ -13,7 +13,8 @@ echo -e "${GREEN}此脚本的来源及教程：https://github.com/the-lazy-me/On
 
 # 提示用户是否继续
 while true; do
-    echo -e "${YELLOW}此脚本适用于在 Linux 系统上首次部署 QChatGPT+NapCat，是否继续？（y/n）${NC}"
+    echo -e "${YELLOW}此脚本适用于在 Linux 系统上首次部署 QChatGPT+NapCat，是否继续？${NC}"
+    echo -e "${YELLOW}输入 y 代表继续，输入 n 代表取消${NC}"
     echo -n ">>> "
     read input
     case $input in
@@ -31,60 +32,9 @@ while true; do
     esac
 done
 
-echo -e "${YELLOW}检测Docker是否安装...${NC}"
-
-# 检查并安装 Docker
-if ! command -v docker &> /dev/null; then
-    echo -e "${YELLOW}Docker 未安装，正在安装 Docker，请稍等...${NC}"
-
-    # 检测IP位置
-    ip_location=$(curl -s https://ipinfo.io/country)
-    if [ "$ip_location" == "CN" ]; then
-        echo -e "${YELLOW}检测到当前IP在中国大陆，使用docker-proxy.lazyshare.top源安装Docker${NC}"
-        curl -fsSL https://docker-proxy.lazyshare.top/get.docker.com -o get-docker.sh > /dev/null 2>&1
-        sh get-docker.sh > /dev/null 2>&1
-        rm get-docker.sh > /dev/null 2>&1
-
-        # 配置 Docker 镜像源
-        sudo mkdir -p /etc/docker
-        sudo tee /etc/docker/daemon.json <<-'EOF'
-{
-  "registry-mirrors": ["https://docker-proxy.lazyshare.top"]
-}
-EOF
-        sudo systemctl daemon-reload
-        sudo systemctl restart docker
-    else
-        echo -e "${YELLOW}当前IP不在中国大陆，使用官方源安装Docker${NC}"
-        curl -fsSL https://get.docker.com -o get-docker.sh > /dev/null 2>&1
-        sh get-docker.sh > /dev/null 2>&1
-        rm get-docker.sh > /dev/null 2>&1
-    fi
-
-    sudo systemctl start docker > /dev/null 2>&1
-    sudo systemctl enable docker > /dev/null 2>&1
-    echo -e "${GREEN}Docker 安装完成${NC}"
-else
-    echo -e "${GREEN}Docker 已安装${NC}"
-fi
-
-echo -e "${YELLOW}检测Docker Compose是否安装...${NC}"
-
-# 检查并安装 Docker Compose 插件
-if ! docker compose version &> /dev/null; then
-    echo -e "${YELLOW}Docker Compose 插件未安装，正在安装 Docker Compose 插件，请稍等...${NC}"
-    DOCKER_CONFIG=${DOCKER_CONFIG:-$HOME/.docker}
-    mkdir -p $DOCKER_CONFIG/cli-plugins
-    curl -SL https://github.com/docker/compose/releases/download/v2.29.2/docker-compose-linux-x86_64 -o $DOCKER_CONFIG/cli-plugins/docker-compose > /dev/null 2>&1
-    chmod +x $DOCKER_CONFIG/cli-plugins/docker-compose
-    echo -e "${GREEN}Docker Compose 插件安装完成${NC}"
-else
-    echo -e "${GREEN}Docker Compose 插件已安装${NC}"
-fi
-
 # 检查 jq 是否安装，如果未安装则自动安装
 if ! command -v jq &> /dev/null; then
-    echo -e "${YELLOW}jq 未安装，正在安装 jq，请稍等...${NC}"
+    echo -e "${YELLOW}jq 未安装，即将安装 jq${NC}"
     
     # 检测操作系统并安装 jq
     if [ -x "$(command -v apt-get)" ]; then
@@ -98,13 +48,39 @@ if ! command -v jq &> /dev/null; then
     elif [ -x "$(command -v brew)" ]; then
         brew install jq > /dev/null 2>&1
     else
-        echo -e "${RED}无法检测到支持的包管理器，请手动安装 jq。${NC}"
+        echo -e "\n${RED}无法检测到支持的包管理器，请手动安装 jq。${NC}"
         exit 1
     fi
-    
     echo -e "${GREEN}jq 安装完成${NC}"
 else
     echo -e "${GREEN}jq 已安装${NC}"
+fi
+
+# 检查并安装 Docker
+if ! command -v docker &> /dev/null; then
+    echo -e "${YELLOW}Docker 未安装，即将进行Docker安装...${NC}"
+    
+    # 获取地理位置
+    location=$(curl -s https://ipinfo.io/json | jq -r '.country')
+    
+    if [ "$location" == "CN" ]; then
+        echo -e "\n${YELLOW}检测到您在中国大陆，使用阿里云镜像安装 Docker${NC}"
+        echo -e "${YELLOW}请耐心等待安装完成${NC}"
+        sudo curl -fsSL https://gitee.com/tech-shrimp/docker_installer/releases/download/latest/linux.sh | bash -s docker --mirror Aliyun > /dev/null 2>&1
+    else
+        echo -e "\n${YELLOW}使用默认方式安装 Docker${NC}"
+        echo -e "${YELLOW}请耐心等待安装完成${NC}"
+        curl -fsSL https://get.docker.com -o get-docker.sh > /dev/null 2>&1
+        sh get-docker.sh > /dev/null 2>&1
+        rm get-docker.sh > /dev/null 2>&1
+    fi
+    
+    sudo systemctl start docker > /dev/null 2>&1
+    sudo systemctl enable docker > /dev/null 2>&1
+    
+    echo -e "${GREEN}Docker 安装完成${NC}"
+else
+    echo -e "${GREEN}Docker 已安装${NC}"
 fi
 
 # 提示用户输入机器人QQ
@@ -122,7 +98,6 @@ done
 # 提示用户输入API key并进行校验
 while true; do
     echo -e "${YELLOW}请输入你在 https://ai.thelazy.top 获取的令牌：${NC}"
-    echo -e "${RED}其他来源请自行参考教程${NC}"
     echo -n ">>> "
     read api_key
     if [ -n "$api_key" ]; then
@@ -196,64 +171,37 @@ if [ -d "/home/QChatGPT/data" ] || [ -d "/home/QChatGPT/plugins" ]; then
     rm -rf /home/QChatGPT/plugins
 fi
 
-# 创建临时的 docker-compose.yml 文件
-cat << EOF > docker-compose.yml
+# 创建必要的目录
+mkdir -p /home/QChatGPT/data /home/QChatGPT/plugins
 
-services:
-  qchatgpt:
-    image: rockchin/qchatgpt:latest
-    container_name: QChatGPT
-    ports:
-      - "5140:5140"
-    volumes:
-      - /home/QChatGPT/data:/app/data
-      - /home/QChatGPT/plugins:/app/plugins
-    environment:
-      - TZ=Asia/Shanghai
-    restart: unless-stopped
-    networks:
-      - qchatgpt-net
+# 创建 Docker 网络
+docker network create qchatgpt-net
 
-  napcat:
-    environment:
-      - ACCOUNT=$bot_qq
-      - WSR_ENABLE=true
-      - WS_URLS=["ws://qchatgpt:5140/ws"]
-    container_name: NapCat
-    ports:
-      - 6099:6099
-    restart: always
-    image: mlikiowa/napcat-docker:latest
-    depends_on:
-      - qchatgpt
-    networks:
-      - qchatgpt-net
-
-networks:
-  qchatgpt-net:
-    driver: bridge
-EOF
-
-# 执行 docker compose
-docker compose up -d
-
-# 删除临时的 docker-compose.yml 文件
-rm docker-compose.yml
-
-echo -e "${GREEN}Docker Compose 已执行完毕${NC}"
+echo -e "${YELLOW}开始运行 QChatGPT容器...${NC}"
+# 运行 QChatGPT 容器
+docker run -d \
+  --name QChatGPT \
+  -p 5140:5140 \
+  -v /home/QChatGPT/data:/app/data \
+  -v /home/QChatGPT/plugins:/app/plugins \
+  -e TZ=Asia/Shanghai \
+  --restart unless-stopped \
+  --network qchatgpt-net \
+  rockchin/qchatgpt:latest
 
 # 等待 QChatGPT 容器启动
 container_name="QChatGPT"
 max_attempts=30
 attempt=1
 
+echo -e "${YELLOW}等待 QChatGPT 容器启动中...${NC}"
 while [ $attempt -le $max_attempts ]; do
     if docker inspect --format='{{.State.Running}}' "$container_name" 2>/dev/null | grep -q "true"; then
         echo -e "${GREEN}容器 '$container_name' 已启动并运行${NC}"
         echo -e "${YELLOW}等待配置文件生成...${NC}"
         break
     fi
-    sleep 5
+    sleep 1
     ((attempt++))
 done
 
@@ -264,8 +212,9 @@ fi
 
 # 等待配置文件生成
 while [ ! -f "/home/QChatGPT/data/config/provider.json" ] || [ ! -f "/home/QChatGPT/data/config/system.json" ] || [ ! -f "/home/QChatGPT/data/config/platform.json" ]; do
-    sleep 5
+    sleep 1
 done
+echo -e "${GREEN}配置文件已生成${NC}"
 
 # 修改 platform.json["platform-adapters"][2]["enable"] 为 true
 jq '.["platform-adapters"][2]["enable"] = true' /home/QChatGPT/data/config/platform.json > /home/QChatGPT/data/config/platform.tmp.json && mv /home/QChatGPT/data/config/platform.tmp.json /home/QChatGPT/data/config/platform.json
@@ -292,16 +241,50 @@ sleep 5
 # 重启 QChatGPT 容器
 docker restart QChatGPT
 
-echo -e "${GREEN}配置文件已更新，QChatGPT 已重新启动${NC}"
+echo -e "${GREEN}配置文件更新完成${NC}"
 
 # 再次等待 QChatGPT 容器启动
 attempt=1
+echo -e "${YELLOW}等待 QChatGPT 容器重启中...${NC}"
+while [ $attempt -le $max_attempts ]; do
+    if docker inspect --format='{{.State.Running}}' "$container_name" 2>/dev/null | grep -q "true"; then
+        echo -e "${GREEN}容器 '$container_name' 已重启并运行${NC}"
+        break
+    fi
+    sleep 1
+    ((attempt++))
+done
+
+if [ $attempt -gt $max_attempts ]; then
+    echo -e "${RED}容器 '$container_name' 未能在预期时间内重启${NC}"
+    exit 1
+fi
+
+echo -e "${YELLOW}开始运行 NapCat 容器...${NC}"
+# 运行 NapCat 容器
+docker run -d \
+  --name NapCat \
+  -p 6099:6099 \
+  -e ACCOUNT=$bot_qq \
+  -e WSR_ENABLE=true \
+  -e WS_URLS=["ws://qchatgpt:5140/ws"] \
+  --restart always \
+  --network qchatgpt-net \
+  mlikiowa/napcat-docker:latest
+
+# 等待 NapCat 容器启动
+container_name="NapCat"
+max_attempts=30
+attempt=1
+
+echo -e "${YELLOW}等待 NapCat 容器启动中...${NC}"
 while [ $attempt -le $max_attempts ]; do
     if docker inspect --format='{{.State.Running}}' "$container_name" 2>/dev/null | grep -q "true"; then
         echo -e "${GREEN}容器 '$container_name' 已启动并运行${NC}"
+        docker logs NapCat
         break
     fi
-    sleep 5
+    sleep 1
     ((attempt++))
 done
 
@@ -310,11 +293,24 @@ if [ $attempt -gt $max_attempts ]; then
     exit 1
 fi
 
+# 在NapCat logs中查找NapCat Shell App Loading是否出现
+echo -e "${YELLOW}等待登录二维码的生成中...${NC}"
+while true; do
+    if docker logs NapCat 2>&1 | grep -q "NapCat Shell App Loading..."; then
+        break
+    fi
+    sleep 1
+done
+
 # 查找docker logs NapCat中的NapCat Shell App Loading...是倒数第几行
 line=$(docker logs NapCat 2>&1 | grep -n "NapCat Shell App Loading..." | tail -n 1 | cut -d ":" -f 1)
 
 # 输出NapCat的日志，从NapCat Shell App Loading...开始
+echo -e "${YELLOW}NapCat 容器日志（只需关注二维码即可）：${NC}"
 docker logs NapCat 2>&1 | tail -n +$line
+
+# 将NapCat容器内/usr/src/app/napcat/qrcode.png 复制到本地
+docker cp NapCat:/usr/src/app/napcat/qrcode.png /usr/src/app/napcat/qrcode.png
 
 echo -e "${GREEN}QChatGPT+NapCat部署脚本执行完毕${NC}"
 
