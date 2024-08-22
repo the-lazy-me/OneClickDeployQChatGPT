@@ -36,9 +36,31 @@ echo -e "${YELLOW}检测Docker是否安装...${NC}"
 # 检查并安装 Docker
 if ! command -v docker &> /dev/null; then
     echo -e "${YELLOW}Docker 未安装，正在安装 Docker，请稍等...${NC}"
-    curl -fsSL https://get.docker.com -o get-docker.sh > /dev/null 2>&1
-    sh get-docker.sh > /dev/null 2>&1
-    rm get-docker.sh > /dev/null 2>&1
+
+    # 检测IP位置
+    ip_location=$(curl -s https://ipinfo.io/country)
+    if [ "$ip_location" == "CN" ]; then
+        echo -e "${YELLOW}检测到当前IP在中国大陆，使用docker-proxy.lazyshare.top源安装Docker${NC}"
+        curl -fsSL https://docker-proxy.lazyshare.top/get.docker.com -o get-docker.sh > /dev/null 2>&1
+        sh get-docker.sh > /dev/null 2>&1
+        rm get-docker.sh > /dev/null 2>&1
+
+        # 配置 Docker 镜像源
+        sudo mkdir -p /etc/docker
+        sudo tee /etc/docker/daemon.json <<-'EOF'
+{
+  "registry-mirrors": ["https://docker-proxy.lazyshare.top"]
+}
+EOF
+        sudo systemctl daemon-reload
+        sudo systemctl restart docker
+    else
+        echo -e "${YELLOW}当前IP不在中国大陆，使用官方源安装Docker${NC}"
+        curl -fsSL https://get.docker.com -o get-docker.sh > /dev/null 2>&1
+        sh get-docker.sh > /dev/null 2>&1
+        rm get-docker.sh > /dev/null 2>&1
+    fi
+
     sudo systemctl start docker > /dev/null 2>&1
     sudo systemctl enable docker > /dev/null 2>&1
     echo -e "${GREEN}Docker 安装完成${NC}"
