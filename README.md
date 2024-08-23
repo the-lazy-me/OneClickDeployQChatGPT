@@ -16,3 +16,5 @@ sudo curl -fsSL -o deploy.sh https://pan.lazyshare.top/one-click-deploy-qchatgpt
    - 直接输入令牌，默认按来源于[此处](https://ai.thelazy.top)，如需使用官方或者其他，请在令牌后添加`@<官方或其他baseurl>`（若为官方，baseurl为`https://api.openai.com/v1`，其他请按实际填写）
 2. 此脚本适合各个Linux的分发版吗
    - `I don't know`，仅在`Ubuntu 22.04`测试过，如有使用问题，请提issue或加群（群号：619154800）询问
+3. 配置文件在哪里？
+   - 位于本机`/home/QChatGPT`目录下
